@@ -1,11 +1,10 @@
-class Book {
-    constructor(id, title, author, year, genre) {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.year = year;
-        this.genre = genre;
-    }
-}
+const mongoose = require('mongoose');
 
-module.exports = Book;
+const bookSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    publishedYear: { type: Number, required: true },
+    genre: { type: String, required: true }
+});
+
+module.exports = mongoose.model('Book', bookSchema);
