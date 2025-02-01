@@ -1,73 +1,39 @@
-const readline = require('readline');
-const { addBook, viewBooks, updateBook, deleteBook } = require('./services/book_service');
+const express = require('express');
+const bodyParser = require('body-parser');
+const connectDB = require('./config/mongodb');
+const userRoutes = require('./routes/user_routes');
+const postRoutes = require('./routes/post_routes');
+const bookRoutes = require('./routes/book_routes');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+const app = express();
+const PORT = 5000;
 
-const askQuestion = (question) => {
-    return new Promise(resolve => rl.question(question, resolve));
+connectDB();
+
+app.use(bodyParser.json());
+
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/books', bookRoutes);
+
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Express API with MongoDB",
+            version: "1.0.0",
+            description: "API for author-post-book configuration",
+        },
+    },
+    apis: ["./routes/*.js"],
 };
 
-const mainMenu = async () => {
-    console.log("\nWelcome to the Library");
-    console.log("1. Add a new book");
-    console.log("2. View all books");
-    console.log("3. Update a book");
-    console.log("4. Delete a book");
-    console.log("5. Exit");
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    const choice = await askQuestion("Please select an option: ");
-    
-    switch (choice) {
-        case '1':
-            await addNewBook();
-            break;
-        case '2':
-            viewBooks();
-            break;
-        case '3':
-            await updateExistingBook();
-            break;
-        case '4':
-            await deleteBookById();
-            break;
-        case '5':
-            rl.close();
-            return;
-        default:
-            console.log("Invalid choice. Please try again.");
-    }
+console.log("Swagger i available on http://localhost:5000/api-docs");
 
-    mainMenu(); 
-};
-
-const addNewBook = async () => {
-    const title = await askQuestion("Enter book title: ");
-    const author = await askQuestion("Enter book author: ");
-    const year = await askQuestion("Enter book year: ");
-    const genre = await askQuestion("Enter book genre: ");
-    
-    addBook(title, author, year, genre);
-    console.log("Book added successfully!");
-};
-
-const updateExistingBook = async () => {
-    const id = parseInt(await askQuestion("Enter book ID to update: "));
-    const title = await askQuestion("Enter new book title: ");
-    const author = await askQuestion("Enter new book author: ");
-    const year = await askQuestion("Enter new book year: ");
-    const genre = await askQuestion("Enter new book genre: ");
-    
-    updateBook(id, title, author, year, genre);
-    console.log("Book updated successfully!");
-};
-
-const deleteBookById = async () => {
-    const id = parseInt(await askQuestion("Enter book ID to delete: "));
-    deleteBook(id);
-    console.log("Book deleted successfully!");
-};
-
-mainMenu();
+// Запуск сервера
+app.listen(PORT, () => console.log(`Server is running on ${PORT}`));

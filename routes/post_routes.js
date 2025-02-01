@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
         const { title, content, author } = req.body;
 
         const userExists = await User.findById(author);
-        if (!userExists) return res.status(404).json({ message: "Пользователь не найден" });
+        if (!userExists) return res.status(404).json({ message: "User not found" });
 
         const newPost = new Post({ title, content, author });
         const savedPost = await newPost.save();
