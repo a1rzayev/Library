@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user');
+const user_controller = require('../controllers/user_controller');
+
 
 /**
  * @swagger
@@ -11,14 +12,18 @@ const User = require('../models/user');
  *       200:
  *         description: users list
  */
-router.get('/', async (req, res) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.get('/', user_controller.getAll);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: get user by id
+ *     responses:
+ *       200:
+ *         description: user by id
+ */
+router.get('/:id', user_controller.getById);
 
 /**
  * @swagger
@@ -26,15 +31,32 @@ router.get('/', async (req, res) => {
  *   post:
  *     summary: add user
  */
-router.post('/', async (req, res) => {
-    try {
-        const { name, email } = req.body;
-        const newUser = new User({ name, email });
-        const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.post('/', user_controller.create);
+
+/**
+ * @swagger
+ * /api/users:
+ *   put:
+ *     summary: update user
+ *     responses:
+ *       200:
+ *         description: user was updated
+ *       404:
+ *         description: user not found
+ */
+router.put('/:id', user_controller.update);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   delete:
+ *     summary: delete user by id
+ *     responses:
+ *       200:
+ *         description: user has been deleted
+ *       404:
+ *         description: user not found
+ */
+router.delete('/:id', user_controller.delete);
 
 module.exports = router;
