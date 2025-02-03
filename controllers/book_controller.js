@@ -2,7 +2,7 @@ const Book = require('../models/book');
 
 exports.getAll = async (req, res) => {
     try {
-        const books = await Book.find().populate('author', 'name email');
+        const books = await Book.find().populate('author', 'name email genre');
         res.json(books);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -11,8 +11,8 @@ exports.getAll = async (req, res) => {
 
 exports.create = async (req, res) => {
     try {
-        const { title, author, publishedYear } = req.body;
-        const newBook = new Book({ title, author, publishedYear });
+        const { title, author, publishedYear, genre } = req.body;
+        const newBook = new Book({ title, author, publishedYear, genre });
         const savedBook = await newBook.save();
         res.status(201).json(savedBook);
     } catch (err) {
@@ -22,8 +22,8 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
     try {
-        const { title, publishedYear } = req.body;
-        const updatedBook = await Book.findByIdAndUpdate(req.params.id, { title, publishedYear }, { new: true });
+        const { title, publishedYear, genre } = req.body;
+        const updatedBook = await Book.findByIdAndUpdate(req.params.id, { title, publishedYear, genre }, { new: true });
         if (!updatedBook) return res.status(404).json({ message: 'Book not found' });
         res.json(updatedBook);
     } catch (err) {
