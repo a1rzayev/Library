@@ -1,7 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const Book = require('../models/book');
-const User = require('../models/user');
+const book_controller = require('../controllers/book_controller');
+
+
+/**
+ * @swagger
+ * /api/books:
+ *   get:
+ *     summary: get books list
+ *     responses:
+ *       200:
+ *         description: books list
+ */
+router.get('/', book_controller.getAll);
 
 /**
  * @swagger
@@ -9,34 +20,32 @@ const User = require('../models/user');
  *   post:
  *     summary: add book
  */
-router.post('/', async (req, res) => {
-    try {
-        const { title, author, publishedYear, genre } = req.body;
-
-        const userExists = await User.findById(author);
-        if (!userExists) return res.status(404).json({ message: "Author hasnt been found" });
-
-        const newBook = new Book({ title, author, publishedYear, genre });
-        const savedBook = await newBook.save();
-        res.status(201).json(savedBook);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.post('/', book_controller.create);
 
 /**
  * @swagger
  * /api/books:
- *   get:
- *     summary: author-book list
+ *   put:
+ *     summary: update book
+ *     responses:
+ *       200:
+ *         description: book was updated
+ *       404:
+ *         description: book not found
  */
-router.get('/', async (req, res) => {
-    try {
-        const books = await Book.find().populate('author', 'name email');
-        res.json(books);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.put('/:id', book_controller.update);
+
+/**
+ * @swagger
+ * /api/books/{id}:
+ *   delete:
+ *     summary: delete book by id
+ *     responses:
+ *       200:
+ *         description: book has been deleted
+ *       404:
+ *         description: book not found
+ */
+router.delete('/:id', book_controller.delete);
 
 module.exports = router;
