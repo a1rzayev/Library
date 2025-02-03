@@ -1,7 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const Post = require('../models/post');
-const User = require('../models/user');
+const post_controller = require('../controllers/post_controller');
+
+
+/**
+ * @swagger
+ * /api/posts:
+ *   get:
+ *     summary: get posts list
+ *     responses:
+ *       200:
+ *         description: posts list
+ */
+router.get('/', post_controller.getAll);
 
 /**
  * @swagger
@@ -9,34 +20,32 @@ const User = require('../models/user');
  *   post:
  *     summary: add post
  */
-router.post('/', async (req, res) => {
-    try {
-        const { title, content, author } = req.body;
-
-        const userExists = await User.findById(author);
-        if (!userExists) return res.status(404).json({ message: "User not found" });
-
-        const newPost = new Post({ title, content, author });
-        const savedPost = await newPost.save();
-        res.status(201).json(savedPost);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.post('/', post_controller.create);
 
 /**
  * @swagger
  * /api/posts:
- *   get:
- *     summary: author-post list
+ *   put:
+ *     summary: update post
+ *     responses:
+ *       200:
+ *         description: post was updated
+ *       404:
+ *         description: post not found
  */
-router.get('/', async (req, res) => {
-    try {
-        const posts = await Post.find().populate('author', 'name email');
-        res.json(posts);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+router.put('/:id', post_controller.update);
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *   delete:
+ *     summary: delete post by id
+ *     responses:
+ *       200:
+ *         description: post has been deleted
+ *       404:
+ *         description: post not found
+ */
+router.delete('/:id', post_controller.delete);
 
 module.exports = router;
